@@ -1,0 +1,22 @@
+databases:
+  - name: ighub-db
+    databaseName: ighub
+    user: ighub_user
+
+services:
+  - type: web
+    name: ighub-kids-code-camp
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ighub-db
+          property: connectionString
+      - key: ADMIN_SECRET
+        value: "your-admin-secret"
+      - key: PAYSTACK_SECRET_KEY
+        value: "sk_test_replace_with_live_key"
+      - key: NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY
+        value: "pk_test_replace_with_live_key"
