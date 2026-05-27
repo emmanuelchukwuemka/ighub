@@ -1,0 +1,26 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Registration {
+  id               Int      @id @default(autoincrement())
+  firstName        String
+  lastName         String
+  email            String   @unique
+  phone            String
+  childName        String
+  childAge         Int
+  location         String
+  course           String
+  referralCode     String?
+  referralCount    Int      @default(0)
+  referredBy       String?
+  paid             Boolean  @default(false)
+  paystackReference String?
+  createdAt        DateTime @default(now())
+}
