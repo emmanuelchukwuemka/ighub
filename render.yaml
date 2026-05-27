@@ -2,11 +2,13 @@ databases:
   - name: ighub-db
     databaseName: ighub
     user: ighub_user
+    plan: free
 
 services:
   - type: web
     name: ighub-kids-code-camp
     env: node
+    plan: free
     buildCommand: npm install && npm run build
     startCommand: npm run start
     envVars:
