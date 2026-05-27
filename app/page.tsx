@@ -67,15 +67,26 @@ export default function HomePage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const target = new Date("2026-08-01T09:00:00");
-    const timer = setInterval(() => {
-      const diff = target.getTime() - new Date().getTime();
-      if (diff > 0) {
-        setTimeLeft(formatCountdown(diff));
-      } else {
-        setTimeLeft({days:0,hours:0,minutes:0,seconds:0});
-      }
-    }, 1000);
+    let timer: NodeJS.Timeout;
+    
+    // Fetch the dynamic date from the database settings
+    fetch("/api/admin/settings")
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.campDate) {
+          const target = new Date(data.campDate);
+          timer = setInterval(() => {
+            const diff = target.getTime() - new Date().getTime();
+            if (diff > 0) {
+              setTimeLeft(formatCountdown(diff));
+            } else {
+              setTimeLeft({days:0,hours:0,minutes:0,seconds:0});
+            }
+          }, 1000);
+        }
+      })
+      .catch(err => console.error("Failed to fetch settings", err));
+
     return () => clearInterval(timer);
   }, []);
 
@@ -133,26 +144,26 @@ export default function HomePage() {
       </nav>
 
       {/* Hero Section */}
-      <section style={{ padding: "80px 5% 120px", position: "relative", overflow: "hidden", maxWidth: 1300, margin: "0 auto" }}>
-        <div className="grid grid-2" style={{ alignItems: "center", gap: 64 }}>
+      <section style={{ padding: "80px 5% 120px", position: "relative", overflow: "hidden", minHeight: "85vh", display: "flex", alignItems: "center", backgroundImage: "linear-gradient(rgba(0, 31, 84, 0.85), rgba(0, 31, 84, 0.75)), url('/hero-bg.png')", backgroundSize: "cover", backgroundPosition: "center" }}>
+        <div className="grid grid-2" style={{ alignItems: "center", gap: 64, maxWidth: 1300, margin: "0 auto", position: "relative", zIndex: 2 }}>
           <div>
-            <div className="badge" style={{ marginBottom: 24 }}>
+            <div className="badge" style={{ marginBottom: 24, background: "rgba(255, 107, 0, 0.2)", color: "#ff8c33", border: "1px solid rgba(255, 107, 0, 0.3)" }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
               August 2026 Edition
             </div>
-            <h1 className="title" style={{ fontSize: "clamp(3rem, 6vw, 4.5rem)", marginBottom: 24 }}>
+            <h1 className="title" style={{ fontSize: "clamp(3rem, 6vw, 4.5rem)", marginBottom: 24, color: "#ffffff" }}>
               Empower your child's <span style={{ color: "#ff6b00" }}>Future.</span>
             </h1>
-            <p className="subtitle" style={{ fontSize: "1.2rem", lineHeight: 1.6, marginBottom: 40, maxWidth: 540 }}>
+            <p className="subtitle" style={{ fontSize: "1.2rem", lineHeight: 1.6, marginBottom: 40, maxWidth: 540, color: "#b0c4de" }}>
               Join over 500 students at IGHub Kids Code Camp to build practical digital skills that open doors worldwide. No prior experience required.
             </p>
             <div style={{ display: "flex", gap: 16 }}>
-              <a href="#register" className="button button-accent" style={{ fontSize: "1.1rem", padding: "18px 32px" }}>Secure a Spot</a>
-              <a href="#courses" className="button button-secondary" style={{ fontSize: "1.1rem", padding: "18px 32px" }}>View Courses</a>
+              <a href="#register" className="button button-accent" style={{ fontSize: "1.1rem", padding: "18px 32px", background: "#ff6b00", color: "white" }}>Secure a Spot</a>
+              <a href="#courses" className="button button-secondary" style={{ fontSize: "1.1rem", padding: "18px 32px", background: "rgba(255,255,255,0.1)", color: "white", border: "1px solid rgba(255,255,255,0.2)" }}>View Courses</a>
             </div>
           </div>
           
-          <div className="card" style={{ padding: 48, textAlign: "center", background: "#f8faff", border: "1px solid #dce4f5" }}>
+          <div className="card" style={{ padding: 48, textAlign: "center", background: "rgba(255,255,255,0.95)", border: "none", backdropFilter: "blur(12px)", boxShadow: "0 20px 40px rgba(0,0,0,0.2)" }}>
             <h3 style={{ fontSize: "1.4rem", fontWeight: 700, marginBottom: 32, color: "#003388" }}>Camp starts in</h3>
             <div style={{ display: "flex", gap: 16, justifyContent: "center" }}>
               {[

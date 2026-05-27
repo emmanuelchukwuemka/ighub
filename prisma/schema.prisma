@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -23,4 +23,10 @@ model Registration {
   paid             Boolean  @default(false)
   paystackReference String?
   createdAt        DateTime @default(now())
+}
+
+model SystemSettings {
+  id          Int      @id @default(1)
+  campDate    DateTime @default("2026-08-01T09:00:00Z")
+  updatedAt   DateTime @updatedAt
 }

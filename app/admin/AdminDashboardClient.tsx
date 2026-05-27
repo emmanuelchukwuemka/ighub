@@ -24,17 +24,23 @@ export default function AdminDashboardClient({
   totalRegs, 
   paidRegs, 
   pendingRegs, 
-  totalRevenue 
+  totalRevenue,
+  initialCampDate
 }: { 
   initialRegistrations: Registration[],
   totalRegs: number,
   paidRegs: number,
   pendingRegs: number,
-  totalRevenue: number
+  totalRevenue: number,
+  initialCampDate: string
 }) {
   const router = useRouter();
   const [registrations, setRegistrations] = useState(initialRegistrations);
-  const [tab, setTab] = useState<"registrations" | "referrals">("registrations");
+  const [tab, setTab] = useState<"registrations" | "referrals" | "settings">("registrations");
+  
+  // Settings
+  const [campDate, setCampDate] = useState(initialCampDate.slice(0, 16)); // Format for datetime-local
+  const [savingSettings, setSavingSettings] = useState(false);
   
   // Filters
   const [search, setSearch] = useState("");
@@ -130,6 +136,23 @@ export default function AdminDashboardClient({
     }
   };
 
+  const saveSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingSettings(true);
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ campDate: new Date(campDate).toISOString() })
+      });
+      if (res.ok) alert("Settings saved! The countdown timer has been updated.");
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setSavingSettings(false);
+    }
+  };
+
   return (
     <div style={{ display: "flex", minHeight: "100vh", background: "#f4f7fe", color: "#2b3674", fontFamily: "'Outfit', sans-serif" }}>
       
@@ -148,6 +171,10 @@ export default function AdminDashboardClient({
           <button onClick={() => setTab("referrals")} style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 20px", background: tab === "referrals" ? "#003388" : "transparent", color: tab === "referrals" ? "#ffffff" : "#a3aed1", borderRadius: 12, fontWeight: 600, border: "none", cursor: "pointer", textAlign: "left", width: "100%" }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
             Referrals
+          </button>
+          <button onClick={() => setTab("settings")} style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 20px", background: tab === "settings" ? "#003388" : "transparent", color: tab === "settings" ? "#ffffff" : "#a3aed1", borderRadius: 12, fontWeight: 600, border: "none", cursor: "pointer", textAlign: "left", width: "100%" }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            Settings
           </button>
         </nav>
 
@@ -340,7 +367,7 @@ export default function AdminDashboardClient({
               </div>
             )}
           </div>
-        ) : (
+        ) : tab === "referrals" ? (
           <div style={{ background: "#ffffff", borderRadius: 24, boxShadow: "0 4px 20px rgba(0,0,0,0.02)", overflow: "hidden" }}>
             <div style={{ padding: "24px 32px", borderBottom: "1px solid #edf2f7" }}>
                <h2 style={{ margin: 0, fontSize: "1.4rem", fontWeight: 700, color: "#2b3674" }}>Referral Leaderboard</h2>
@@ -375,6 +402,26 @@ export default function AdminDashboardClient({
                 </tbody>
               </table>
             </div>
+          </div>
+        ) : (
+          <div style={{ background: "#ffffff", borderRadius: 24, boxShadow: "0 4px 20px rgba(0,0,0,0.02)", padding: 32 }}>
+            <h2 style={{ margin: "0 0 24px", fontSize: "1.4rem", fontWeight: 700, color: "#2b3674" }}>System Settings</h2>
+            <form onSubmit={saveSettings} style={{ maxWidth: 400 }}>
+              <div style={{ marginBottom: 24 }}>
+                <label style={{ display: "block", marginBottom: 8, fontWeight: 600, color: "#2b3674" }}>Camp Start Date (Countdown Timer)</label>
+                <input 
+                  type="datetime-local" 
+                  value={campDate} 
+                  onChange={e => setCampDate(e.target.value)} 
+                  style={{ width: "100%", padding: 12, borderRadius: 8, border: "1px solid #e2e8f0" }} 
+                  required 
+                />
+                <p style={{ fontSize: "0.85rem", color: "#a3aed1", marginTop: 8 }}>This controls the countdown timer on the main landing page.</p>
+              </div>
+              <button type="submit" disabled={savingSettings} style={{ padding: "12px 24px", background: "#003388", color: "white", border: "none", borderRadius: 8, fontWeight: 600, cursor: "pointer", width: "100%" }}>
+                {savingSettings ? "Saving..." : "Save Settings"}
+              </button>
+            </form>
           </div>
         )}
 

@@ -14,6 +14,11 @@ export default async function AdminPage() {
   }
 
   const registrations = await db.registration.findMany({ orderBy: { createdAt: "desc" } });
+  
+  let settings = await db.systemSettings.findFirst();
+  if (!settings) {
+    settings = await db.systemSettings.create({ data: { campDate: new Date("2026-08-01T09:00:00Z") } });
+  }
 
   // Calculate simple metrics for the initial load
   const totalRegs = registrations.length;
@@ -28,6 +33,7 @@ export default async function AdminPage() {
       paidRegs={paidRegs} 
       pendingRegs={pendingRegs} 
       totalRevenue={totalRevenue} 
+      initialCampDate={settings.campDate.toISOString()}
     />
   );
 }
